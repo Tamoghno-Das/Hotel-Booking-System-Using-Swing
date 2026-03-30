@@ -17,6 +17,7 @@ Java Swing desktop app for basic hotel room booking, cancellation, room listing,
 - Windows PowerShell (examples below), or any shell with equivalent commands
 - Optional: Ollama running locally at `http://localhost:11434` for AI pricing
 
+
 ## Build
 
 From project root:
