@@ -1,5 +1,6 @@
 package com.example.swing;
 
+import com.example.service.ChatbotService;
 import com.example.service.HotelService;
 
 import javax.swing.*;
@@ -26,8 +27,18 @@ public class MainDashboard {
         frame.add(new JLabel("Days:"));
         frame.add(daysField);
 
+         JTextField chatInput = new JTextField(30);
+         JButton sendBtn = new JButton("Send");
+         JTextArea chatArea = new JTextArea(10, 40);
 
-        JButton bookBtn = new JButton("Book Room");
+         frame.add(new JLabel("Chatbot:"));
+         frame.add(chatInput);
+         frame.add(sendBtn);
+         frame.add(chatArea);
+
+
+
+         JButton bookBtn = new JButton("Book Room");
         JButton cancelBtn = new JButton("Cancel Booking");
         JButton viewBtn = new JButton("View Rooms");
         JButton countBtn = new JButton("Count Available");
@@ -114,6 +125,65 @@ public class MainDashboard {
 
          frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+
+         ChatbotService bot = new ChatbotService();
+
+         sendBtn.addActionListener(e -> {
+
+             String userText = chatInput.getText();
+
+             // Ask AI
+             String aiResponse = bot.askAI(userText);
+
+             // Extract fields
+             String action = bot.extract(aiResponse, "ACTION");
+             String hotel = bot.extract(aiResponse, "HOTEL");
+             String type = bot.extract(aiResponse, "TYPE");
+             String daysStr = bot.extract(aiResponse, "DAYS");
+             String roomStr = bot.extract(aiResponse, "ROOMID");
+
+             String result = "";
+
+             try {
+
+                 switch (action.toUpperCase()) {
+
+                     case "BOOK":
+                         int days = Integer.parseInt(daysStr);
+                         result = service.bookRoom(hotel, type, days);
+                         break;
+
+                     case "CANCEL":
+                         int roomId = Integer.parseInt(roomStr);
+                         result = service.cancelBooking(hotel, roomId);
+                         break;
+
+                     case "VIEW":
+                         result = service.viewAvailableRooms(hotel);
+                         break;
+
+                     case "PRICE":
+                         int d = Integer.parseInt(daysStr);
+                         result = service.getPriceSuggestion(type, d, hotel);
+                         break;
+
+                     default:
+                         result = "Sorry, I didn't understand.";
+                 }
+
+             } catch (Exception ex) {
+                 result = ex.getMessage();
+             }
+
+             // Display chat
+             chatArea.append("User: " + userText + "\n");
+             chatArea.append("Bot: " + result + "\n\n");
+
+             chatInput.setText("");
+         });
+
+
+
 
      }
 }
